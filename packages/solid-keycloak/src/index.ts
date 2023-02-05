@@ -7,7 +7,7 @@ export type KeycloakProviderParams = {
   /**
    * `KeycloakConfig` to be passed to the Keycloak instance creation
    */
-  config: Parameters<typeof Keycloak>[0]
+  instance: Keycloak.KeycloakInstance;
 
   /**
    * `KeycloakInitOptions` to be passed to the instance's `init` function
@@ -272,55 +272,53 @@ export interface UseKeycloakResult {
 export const KeycloakContext = createContextProvider<
   UseKeycloakResult,
   KeycloakProviderParams
->(({ config, initOptions }: KeycloakProviderParams): UseKeycloakResult => {
-  const [instance] = createResource(async () => {
-    const instance = Keycloak(config)
-    await instance.init(initOptions)
-
+>(({ instance, initOptions }: KeycloakProviderParams): UseKeycloakResult => {
+  const [preparedInstance] = createResource(async () => {
+    await instance.init(initOptions);
     return instance
   })
   const [profile] = createResource(
     instance,
-    async () => await instance()?.loadUserProfile(),
+    async () => await preparedInstance()?.loadUserProfile(),
   )
 
-  const accountManagement = createMemo(() => instance()?.accountManagement)
-  const authenticated = createMemo(() => instance()?.authenticated)
-  const clearToken = createMemo(() => instance()?.clearToken)
-  const createAccountUrl = createMemo(() => instance()?.createAccountUrl)
-  const createLoginUrl = createMemo(() => instance()?.createLoginUrl)
-  const createLogoutUrl = createMemo(() => instance()?.createLogoutUrl)
-  const createRegisterUrl = createMemo(() => instance()?.createRegisterUrl)
-  const flow = createMemo(() => instance()?.flow)
-  const hasRealmRole = createMemo(() => instance()?.hasRealmRole)
-  const hasResourceRole = createMemo(() => instance()?.hasResourceRole)
-  const idToken = createMemo(() => instance()?.idToken)
-  const isTokenExpired = createMemo(() => instance()?.isTokenExpired)
-  const login = createMemo(() => instance()?.login)
-  const logout = createMemo(() => instance()?.logout)
-  const onActionUpdate = createMemo(() => instance()?.onActionUpdate)
-  const onAuthError = createMemo(() => instance()?.onAuthError)
-  const onAuthLogout = createMemo(() => instance()?.onAuthLogout)
-  const onAuthRefreshError = createMemo(() => instance()?.onAuthRefreshError)
+  const accountManagement = createMemo(() => preparedInstance()?.accountManagement)
+  const authenticated = createMemo(() => preparedInstance()?.authenticated)
+  const clearToken = createMemo(() => preparedInstance()?.clearToken)
+  const createAccountUrl = createMemo(() => preparedInstance()?.createAccountUrl)
+  const createLoginUrl = createMemo(() => preparedInstance()?.createLoginUrl)
+  const createLogoutUrl = createMemo(() => preparedInstance()?.createLogoutUrl)
+  const createRegisterUrl = createMemo(() => preparedInstance()?.createRegisterUrl)
+  const flow = createMemo(() => preparedInstance()?.flow)
+  const hasRealmRole = createMemo(() => preparedInstance()?.hasRealmRole)
+  const hasResourceRole = createMemo(() => preparedInstance()?.hasResourceRole)
+  const idToken = createMemo(() => preparedInstance()?.idToken)
+  const isTokenExpired = createMemo(() => preparedInstance()?.isTokenExpired)
+  const login = createMemo(() => preparedInstance()?.login)
+  const logout = createMemo(() => preparedInstance()?.logout)
+  const onActionUpdate = createMemo(() => preparedInstance()?.onActionUpdate)
+  const onAuthError = createMemo(() => preparedInstance()?.onAuthError)
+  const onAuthLogout = createMemo(() => preparedInstance()?.onAuthLogout)
+  const onAuthRefreshError = createMemo(() => preparedInstance()?.onAuthRefreshError)
   const onAuthRefreshSuccess = createMemo(
-    () => instance()?.onAuthRefreshSuccess,
+    () => preparedInstance()?.onAuthRefreshSuccess,
   )
-  const onAuthSuccess = createMemo(() => instance()?.onAuthSuccess)
-  const onReady = createMemo(() => instance()?.onReady)
-  const onTokenExpired = createMemo(() => instance()?.onTokenExpired)
-  const idTokenParsed = createMemo(() => instance()?.idTokenParsed)
-  const realmAccess = createMemo(() => instance()?.realmAccess)
-  const refreshToken = createMemo(() => instance()?.refreshToken)
-  const refreshTokenParsed = createMemo(() => instance()?.refreshTokenParsed)
-  const register = createMemo(() => instance()?.register)
-  const resourceAccess = createMemo(() => instance()?.resourceAccess)
-  const responseMode = createMemo(() => instance()?.responseMode)
-  const responseType = createMemo(() => instance()?.responseType)
-  const subject = createMemo(() => instance()?.subject)
-  const timeSkew = createMemo(() => instance()?.timeSkew)
-  const token = createMemo(() => instance()?.token)
-  const tokenParsed = createMemo(() => instance()?.tokenParsed)
-  const updateToken = createMemo(() => instance()?.updateToken)
+  const onAuthSuccess = createMemo(() => preparedInstance()?.onAuthSuccess)
+  const onReady = createMemo(() => preparedInstance()?.onReady)
+  const onTokenExpired = createMemo(() => preparedInstance()?.onTokenExpired)
+  const idTokenParsed = createMemo(() => preparedInstance()?.idTokenParsed)
+  const realmAccess = createMemo(() => preparedInstance()?.realmAccess)
+  const refreshToken = createMemo(() => preparedInstance()?.refreshToken)
+  const refreshTokenParsed = createMemo(() => preparedInstance()?.refreshTokenParsed)
+  const register = createMemo(() => preparedInstance()?.register)
+  const resourceAccess = createMemo(() => preparedInstance()?.resourceAccess)
+  const responseMode = createMemo(() => preparedInstance()?.responseMode)
+  const responseType = createMemo(() => preparedInstance()?.responseType)
+  const subject = createMemo(() => preparedInstance()?.subject)
+  const timeSkew = createMemo(() => preparedInstance()?.timeSkew)
+  const token = createMemo(() => preparedInstance()?.token)
+  const tokenParsed = createMemo(() => preparedInstance()?.tokenParsed)
+  const updateToken = createMemo(() => preparedInstance()?.updateToken)
 
   return {
     accountManagement,
@@ -371,26 +369,3 @@ export const KeycloakProvider = KeycloakContext[0]
  * Hook for listening to Keycloak instance
  */
 export const useKeycloak = KeycloakContext[1]
-
-export type {
-  KeycloakAccountOptions,
-  KeycloakAdapter,
-  KeycloakConfig,
-  KeycloakError,
-  KeycloakFlow,
-  KeycloakInitOptions,
-  KeycloakInstance,
-  KeycloakLoginOptions,
-  KeycloakLogoutOptions,
-  KeycloakOnLoad,
-  KeycloakPkceMethod,
-  KeycloakProfile,
-  KeycloakPromise,
-  KeycloakPromiseCallback,
-  KeycloakRegisterOptions,
-  KeycloakResourceAccess,
-  KeycloakResponseMode,
-  KeycloakResponseType,
-  KeycloakRoles,
-  KeycloakTokenParsed,
-} from 'keycloak-js'
